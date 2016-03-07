@@ -26,6 +26,24 @@ RUN echo "upload_max_filesize = 2000M" >> /etc/php5/upload_large_dumps.ini \
  && ln -s ../../upload_large_dumps.ini /etc/php5/fpm/conf.d \
  && ln -s ../../upload_large_dumps.ini /etc/php5/cli/conf.d
 
+
+ COPY doctrine-migrations.phar /usr/local/share/doctrine-migrations.phar
+
+ #copy executable file to /usr/local/bin
+ RUN cp /usr/local/share/doctrine-migrations.phar /usr/local/bin/doctrine-migrations
+
+ RUN chmod 655 /usr/local/bin/doctrine-migrations
+
+ # install Composer
+ RUN php -r "readfile('https://getcomposer.org/installer');" > composer-setup.php
+ RUN php -r "if (hash('SHA384', file_get_contents('composer-setup.php')) === 'fd26ce67e3b237fffd5e5544b45b0d92c41a4afe3e3f778e942e43ce6be197b9cdc7c251dcde6e2a52297ea269370680') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); }"
+ RUN php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+ RUN php -r "unlink('composer-setup.php');"
+
+ VOLUME /app
+
+ WORKDIR /app
+
 # expose only nginx HTTP port
 EXPOSE 80
 
